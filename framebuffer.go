@@ -24,17 +24,17 @@ type Device struct {
 func Open(device string) (*Device, error) {
 	file, err := os.OpenFile(device, os.O_RDWR, os.ModeDevice)
 	if err != nil {
-		return nil, fmt.Errorf("could not open device: %v", err)
+		return nil, fmt.Errorf("could not open device: %w", err)
 	}
 	fb := Device{
 		file: file,
 	}
 	if err := fb.ioctl(C.FBIOGET_FSCREENINFO, unsafe.Pointer(&fb.FixScreenInfo)); err != nil {
-		return nil, fmt.Errorf("ioctl FBIOGET_FSCREENINFO failed: %v", err)
+		return nil, fmt.Errorf("ioctl FBIOGET_FSCREENINFO failed: %w", err)
 	}
 	mmap, err := syscall.Mmap(int(file.Fd()), 0, int(fb.FixScreenInfo.SmemLen), syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_SHARED)
 	if err != nil {
-		return nil, fmt.Errorf("could not mmap: %v", err)
+		return nil, fmt.Errorf("could not mmap: %w", err)
 	}
 	fb.Buffer = mmap
 	return &fb, nil
@@ -52,7 +52,7 @@ func (fb *Device) Close() error {
 func (fb *Device) VarScreenInfo() (*VarScreenInfo, error) {
 	v := VarScreenInfo{}
 	if err := fb.ioctl(C.FBIOGET_VSCREENINFO, unsafe.Pointer(&v)); err != nil {
-		return nil, fmt.Errorf("ioctl FBIOGET_FSCREENINFO failed: %v", err)
+		return nil, fmt.Errorf("ioctl FBIOGET_FSCREENINFO failed: %w", err)
 	}
 	return &v, nil
 }
